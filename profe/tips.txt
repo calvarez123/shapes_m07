@@ -1,0 +1,11 @@
+Exemple de path:
+export PATH="$PATH:${HOME}/Documents/Projects/flutter/flutter/bin/"
+
+flutter pub upgrade
+flutter pub upgrade --major-versions
+
+flutter clean .
+flutter create . 
+rm -r test
+flutter config --enable-web
+flutter run -d macos --enable-impeller
