@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
@@ -233,6 +234,40 @@ class LayoutDesignPainter extends CustomPainter {
       for (int i = 0; i < appData.shapesList.length; i++) {
         Shape shape = appData.shapesList[i];
         paintShape(canvas, shape);
+      }
+    }
+
+    if (appData.selectedShapeIndex != -1) {
+      int selectedIndex = appData.selectedShapeIndex;
+      if (selectedIndex < appData.shapesList.length) {
+        Paint paint = Paint()
+          ..color = Colors.yellow.withOpacity(0.5)
+          ..style = PaintingStyle.fill;
+
+        Shape selectedShape = appData.shapesList[selectedIndex];
+        double x = selectedShape.position.dx;
+        double y = selectedShape.position.dy;
+        double width = selectedShape.vertices[0].dx;
+        double height = selectedShape.vertices[0].dy;
+
+        for (int i = 1; i < selectedShape.vertices.length; i++) {
+          x = min(x, selectedShape.position.dx + selectedShape.vertices[i].dx);
+          y = min(y, selectedShape.position.dy + selectedShape.vertices[i].dy);
+          width = max(
+              width, selectedShape.position.dx + selectedShape.vertices[i].dx);
+          height = max(
+              height, selectedShape.position.dy + selectedShape.vertices[i].dy);
+        }
+
+        Rect rect = Rect.fromPoints(Offset(x, y), Offset(width, height));
+
+        canvas.drawRect(rect, paint);
+
+        paint
+          ..color = Colors.yellow
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+        canvas.drawRect(rect, paint);
       }
     }
 

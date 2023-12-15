@@ -31,8 +31,10 @@ class LayoutSidebarShapes extends StatelessWidget {
                   Shape shape = appData.shapesList[index];
                   return GestureDetector(
                     onTap: () {
-                      appData.setSelectedShapeIndex(index);
-                      print("click");
+                      // Actualiza el shape seleccionado cuando se toca un elemento en la lista
+                      appData.selectShape(index);
+                      // Actualiza el estado para redibujar con el nuevo shape seleccionado
+                      appData.notifyListeners();
                     },
                     child: Container(
                       margin: EdgeInsets.all(4.0),

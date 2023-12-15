@@ -96,8 +96,7 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedShapeIndex(int index) {
+  void selectShape(int index) {
     selectedShapeIndex = index;
-    notifyListeners();
   }
 }
