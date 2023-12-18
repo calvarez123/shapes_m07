@@ -11,8 +11,13 @@ class LayoutSidebarFormat extends StatefulWidget {
 }
 
 class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
+  late Widget _preloadedColorPicker;
+  final GlobalKey<CDKDialogPopoverState> _anchorColorButton = GlobalKey();
+  final ValueNotifier<Color> _valueColorNotifier =
+      ValueNotifier(const Color(0x800080FF));
   @override
   Widget build(BuildContext context) {
+    _preloadedColorPicker = _buildPreloadedColorPicker();
     AppData appData = Provider.of<AppData>(context);
 
     TextStyle fontBold =
@@ -59,14 +64,72 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                        alignment: Alignment.centerRight,
-                        width: labelsWidth,
-                        child: Text("Stroke color:", style: font)),
+                      alignment: Alignment.centerRight,
+                      width: labelsWidth,
+                      child: Text("Stroke color:", style: font),
+                    ),
                     const SizedBox(width: 4),
+                    SizedBox(
+                      width: 100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CDKButtonColor(
+                            key: _anchorColorButton,
+                            color: _valueColorNotifier.value,
+                            onPressed: () {
+                              _showPopoverColor(context, _anchorColorButton);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
               ]);
+        },
+      ),
+    );
+  }
+
+  _showPopoverColor(BuildContext context, GlobalKey anchorKey) {
+    final GlobalKey<CDKDialogPopoverArrowedState> key = GlobalKey();
+    if (anchorKey.currentContext == null) {
+      // ignore: avoid_print
+      print("Error: anchorKey not assigned to a widget");
+      return;
+    }
+    CDKDialogsManager.showPopoverArrowed(
+      key: key,
+      context: context,
+      anchorKey: anchorKey,
+      isAnimated: true,
+      isTranslucent: false,
+      onHide: () {},
+      child: _preloadedColorPicker,
+    );
+  }
+
+  Widget _buildPreloadedColorPicker() {
+    AppData appData = Provider.of<AppData>(context);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ValueListenableBuilder<Color>(
+        valueListenable: _valueColorNotifier,
+        builder: (context, value, child) {
+          // Inicializar el color con la opacidad máxima
+          Color initialColor =
+              Color.fromARGB(255, value.red, value.green, value.blue);
+          return CDKPickerColor(
+            color: initialColor,
+            onChanged: (color) {
+              setState(() {
+                _valueColorNotifier.value = color;
+                appData.setSelectedColor(color);
+              });
+            },
+          );
         },
       ),
     );
