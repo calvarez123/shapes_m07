@@ -20,27 +20,26 @@ class AppData with ChangeNotifier {
   Color color1 = Colors.black;
   Color backgroundColor = Colors.black.withOpacity(0.0);
 
-
   void setBackgroundColor(Color value) {
     backgroundColor = value;
     notifyListeners();
   }
 
   void setStrokeWidth(double value) {
-  strokeWidth = value;
-  if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
-    shapesList[selectedShapeIndex].setStrokeWidth(value);
+    strokeWidth = value;
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setStrokeWidth(value);
+    }
+    notifyListeners();
   }
-  notifyListeners();
-}
 
-void setSelectedColor(Color value) {
-  color1 = value;
-  if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
-    shapesList[selectedShapeIndex].setColor(value);
+  void setSelectedColor(Color value) {
+    color1 = value;
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setColor(value);
+    }
+    notifyListeners();
   }
-  notifyListeners();
-}
 
   int selectedShapeIndex = -1;
   int shapeSelectedPrevious = -1;
@@ -138,11 +137,24 @@ void setSelectedColor(Color value) {
   void selectShape(int index) {
     selectedShapeIndex = index;
     if (index >= 0 && index < shapesList.length) {
-    Shape selectedShape = shapesList[index];
-    setStrokeWidth(selectedShape.stroke);
-    setSelectedColor(selectedShape.color);
+      Shape selectedShape = shapesList[index];
+      setStrokeWidth(selectedShape.stroke);
+      setSelectedColor(selectedShape.color);
+    }
+    notifyListeners();
   }
-  notifyListeners();
-    
+
+  void setShapePosition(Offset newShapePosition) {
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setPosition(newShapePosition);
+      notifyListeners();
+    }
+  }
+
+  void updateShapePosition(Offset newShapePosition) {
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setPosition(newShapePosition);
+      notifyListeners();
+    }
   }
 }

@@ -171,31 +171,31 @@ class LayoutDesignPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Size docSize = Size(appData.docSize.width, appData.docSize.height);
 
-    // Defineix els límits de dibuix del canvas
+    // Define los límites de dibujo del canvas
     canvas.save();
     Rect visibleRect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.clipRect(visibleRect);
 
-    // Dibuixa el fons de l'àrea
+    // Dibuja el fondo del área
     Paint paintBackground = Paint();
     paintBackground.color = theme.backgroundSecondary1;
     canvas.drawRect(visibleRect, paintBackground);
 
-    // Guarda l'estat previ a l'escalat i translació
+    // Guarda el estado previo a la escala y translación
     canvas.save();
 
-    // Calcula l'escalat basat en el zoom
+    // Calcula la escala basada en el zoom
     double scale = appData.zoom / 100;
     Size scaledSize = Size(size.width / scale, size.height / scale);
     canvas.scale(scale, scale);
 
-    // Calcula la posició de translació per centrar el punt desitjat
+    // Calcula la posición de translación para centrar el punto deseado
     double translateX = (scaledSize.width / 2) - (docSize.width / 2) - centerX;
     double translateY =
         (scaledSize.height / 2) - (docSize.height / 2) - centerY;
     canvas.translate(translateX, translateY);
 
-    // Dibuixa la 'reixa de fons' del document
+    // Dibuja la 'rejilla de fondo' del documento
     double docW = docSize.width;
     double docH = docSize.height;
 
@@ -215,7 +215,25 @@ class LayoutDesignPainter extends CustomPainter {
           double width = shape.scale.width;
           double height = shape.scale.height;
 
-          canvas.drawRect(Rect.fromLTWH(x, y, width, height), selectionPaint);
+          for (int i = 0; i < shape.vertices.length; i++) {
+            double vertexX = shape.position.dx + shape.vertices[i].dx;
+            double vertexY = shape.position.dy + shape.vertices[i].dy;
+            if (i == 0) {
+              x = vertexX;
+              y = vertexY;
+              width = vertexX;
+              height = vertexY;
+            } else {
+              x = min(x, vertexX);
+              y = min(y, vertexY);
+              width = max(width, vertexX);
+              height = max(height, vertexY);
+            }
+          }
+
+          Rect rect = Rect.fromPoints(Offset(x, y), Offset(width, height));
+
+          canvas.drawRect(rect, selectionPaint);
         }
       }
     }
@@ -226,13 +244,13 @@ class LayoutDesignPainter extends CustomPainter {
       canvas.drawRect(Rect.fromLTWH(0, 0, docW, docH), paint);
     }
 
-    // Dibuixa el fons del document aquí ...
+    // Dibuja el fondo del documento aquí ...
 
     Paint paint = Paint();
     paint.color = appData.backgroundColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, docW, docH), paint);
 
-    // Dibuixa la llista de poligons (segons correspon, relatiu a la seva posició)
+    // Dibuja la lista de polígonos (según corresponda, relativo a su posición)
     if (appData.shapesList.isNotEmpty) {
       for (int i = 0; i < appData.shapesList.length; i++) {
         Shape shape = appData.shapesList[i];
@@ -254,12 +272,14 @@ class LayoutDesignPainter extends CustomPainter {
         double height = selectedShape.vertices[0].dy;
 
         for (int i = 1; i < selectedShape.vertices.length; i++) {
-          x = min(x, selectedShape.position.dx + selectedShape.vertices[i].dx);
-          y = min(y, selectedShape.position.dy + selectedShape.vertices[i].dy);
-          width = max(
-              width, selectedShape.position.dx + selectedShape.vertices[i].dx);
-          height = max(
-              height, selectedShape.position.dy + selectedShape.vertices[i].dy);
+          double vertexX =
+              selectedShape.position.dx + selectedShape.vertices[i].dx;
+          double vertexY =
+              selectedShape.position.dy + selectedShape.vertices[i].dy;
+          x = min(x, vertexX);
+          y = min(y, vertexY);
+          width = max(width, vertexX);
+          height = max(height, vertexY);
         }
 
         Rect rect = Rect.fromPoints(Offset(x, y), Offset(width, height));
@@ -274,17 +294,17 @@ class LayoutDesignPainter extends CustomPainter {
       }
     }
 
-    // Dibuixa el poligon que s'està afegint (relatiu a la seva posició)
+    // Dibuja el polígono que se está agregando (relativo a su posición)
     Shape shape = appData.newShape;
     paintShape(canvas, shape);
 
-    // Restaura l'estat previ a l'escalat i translació
+    // Restaura el estado previo a la escala y translación
     canvas.restore();
 
-    // Dibuixa la regla superior
+    // Dibuja la regla superior
     drawRulers(canvas, theme, size, docSize, scale, translateX, translateY);
 
-    // Restaura l'estat de retall del canvas
+    // Restaura el estado de recorte del canvas
     canvas.restore();
   }
 

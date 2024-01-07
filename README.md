@@ -1,36 +1,16 @@
-# Base Flutter Project for Cuppertino look and feel
+# editor_base
 
-This project is a starting point for a Flutter application with a Cupertino look and feel.
+A new Flutter project.
 
-## Getting Starte
+## Getting Started
 
-cd cupertino_base
-flutter clean
-flutter create . --platforms=macos
+This project is a starting point for a Flutter application.
 
-## Clone and create a different project
+A few resources to get you started if this is your first Flutter project:
 
-For example to create a new GitHub project named FT04-Stacks
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-With a Flutter project named 'stacks'
-
-``` bash
-git clone https://github.com/optimisme/DAM-FlutterCupertinoBase
-mv DAM-FlutterCupertinoBase FT04-Stacks
-cd FT04-Stacks
-mv cupertino_base stacks
-git remote set-url origin https://github.com/GITHUB-USERNAME/FT04-Stacks.git
-git push -u origin main
-
-```
-
-Ensure that 'pubspec.yaml' contains the correct project name
-
-## Download and install dependencies
-
-``` bash
-cd stacks
-flutter create --project-name stacks .
-flutter pub get
-flutter run
-```
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

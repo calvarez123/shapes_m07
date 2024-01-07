@@ -132,3 +132,24 @@ class ActionRemoveShape implements Action {
   }
 }
 
+class ActionMoveShape implements Action {
+  final AppData appData;
+  final int shapeIndex;
+  final Offset previousOffset;
+  final Offset newOffset;
+
+  ActionMoveShape(
+      this.appData, this.shapeIndex, this.previousOffset, this.newOffset);
+
+  @override
+  void undo() {
+    appData.shapesList[shapeIndex].position = previousOffset;
+    appData.forceNotifyListeners();
+  }
+
+  @override
+  void redo() {
+    appData.shapesList[shapeIndex].position = newOffset;
+    appData.forceNotifyListeners();
+  }
+}

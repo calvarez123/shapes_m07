@@ -1,3 +1,4 @@
+import 'package:editor_base/util_shape.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_desktop_kit/cdk.dart';
 import 'package:provider/provider.dart';
@@ -12,13 +13,17 @@ class LayoutSidebarFormat extends StatefulWidget {
 
 class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
   late Widget _preloadedColorPicker;
-  final GlobalKey<CDKDialogPopoverState> _anchorColorButton = GlobalKey();
+  final GlobalKey<CDKDialogPopoverArrowedState> _anchorColorButton =
+      GlobalKey();
   final ValueNotifier<Color> _valueColorNotifier =
       ValueNotifier(const Color(0x800080FF));
+
+  late AppData appData;
+
   @override
   Widget build(BuildContext context) {
+    appData = Provider.of<AppData>(context);
     _preloadedColorPicker = _buildPreloadedColorPicker();
-    AppData appData = Provider.of<AppData>(context);
 
     TextStyle fontBold =
         const TextStyle(fontSize: 12, fontWeight: FontWeight.bold);
@@ -30,64 +35,68 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
         builder: (BuildContext context, BoxConstraints constraints) {
           double labelsWidth = constraints.maxWidth * 0.5;
           return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Stroke and fill:", style: fontBold),
-                const SizedBox(height: 8),
-                Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Stroke and fill:", style: fontBold),
+              const SizedBox(height: 8),
+              Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Container(
+                  alignment: Alignment.centerRight,
+                  width: labelsWidth,
+                  child: Text("Stroke width:", style: font),
+                ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  width: 35,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CDKFieldNumeric(
+                        value: appData.strokeWidth,
+                        min: 1,
+                        max: 100,
+                        units: "px",
+                        decimals: 0,
+                        onValueChanged: (value) {
+                          appData.setStrokeWidth(value);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
                   Container(
-                      alignment: Alignment.centerRight,
-                      width: labelsWidth,
-                      child: Text("Stroke width:", style: font)),
+                    alignment: Alignment.centerRight,
+                    width: labelsWidth,
+                    child: Text("Stroke color:", style: font),
+                  ),
                   const SizedBox(width: 4),
                   SizedBox(
-                    width: 35,
+                    width: 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CDKFieldNumeric(
-                          value: appData.strokeWidth,
-                          min: 1,
-                          max: 100,
-                          units: "px",
-                          decimals: 0,
-                          onValueChanged: (value) {
-                            appData.setStrokeWidth(value);
+                        CDKButtonColor(
+                          key: _anchorColorButton,
+                          color: appData.color1,
+                          onPressed: () {
+                            _showPopoverColor(context, _anchorColorButton);
                           },
                         ),
                       ],
                     ),
                   ),
-                ]),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      alignment: Alignment.centerRight,
-                      width: labelsWidth,
-                      child: Text("Stroke color:", style: font),
-                    ),
-                    const SizedBox(width: 4),
-                    SizedBox(
-                      width: 100,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CDKButtonColor(
-                            key: _anchorColorButton,
-                            color: appData.color1,
-                            onPressed: () {
-                              _showPopoverColor(context, _anchorColorButton);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ]);
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Nueva sección para mostrar las coordenadas
+              _buildCoordinatesSection(),
+            ],
+          );
         },
       ),
     );
@@ -107,8 +116,94 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       isAnimated: true,
       isTranslucent: false,
       onHide: () {},
-      child: _preloadedColorPicker,
+      child: _preloadedColorPicker ?? _buildPreloadedColorPicker(),
     );
+  }
+
+  Widget _buildCoordinatesSection() {
+    // Mostrar la sección solo si hay un shape seleccionado
+    if (appData.selectedShapeIndex != -1) {
+      Shape selectedShape = appData.shapesList[appData.selectedShapeIndex];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Coordinates:",
+              style:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                alignment: Alignment.centerRight,
+                width: 100, // Ancho para el label "Offset X"
+                child: Text("Offset X:", style: const TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 4),
+              Text("${selectedShape.position.dx.toStringAsFixed(2)}px",
+                  style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                alignment: Alignment.centerRight,
+                width: 100, // Ancho para el label "Offset Y"
+                child: Text("Offset Y:", style: const TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 4),
+              Text("${selectedShape.position.dy.toStringAsFixed(2)}px",
+                  style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+      );
+    } else {
+      // Si no hay shape seleccionado, mostrar la sección desactivada
+      return Opacity(
+        opacity: 0.5,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Coordinates:",
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  alignment: Alignment.centerRight,
+                  width: 100,
+                  child:
+                      Text("Offset X:", style: const TextStyle(fontSize: 12)),
+                ),
+                const SizedBox(width: 4),
+                Text("N/A", style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  alignment: Alignment.centerRight,
+                  width: 100,
+                  child:
+                      Text("Offset Y:", style: const TextStyle(fontSize: 12)),
+                ),
+                const SizedBox(width: 4),
+                Text("N/A", style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    }
   }
 
   Widget _buildPreloadedColorPicker() {
@@ -121,7 +216,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
           // Inicializar el color con la opacidad máxima
           Color initialColor =
               Color.fromARGB(255, value.red, value.green, value.blue);
-          return CDKPickerColor(
+          _preloadedColorPicker = CDKPickerColor(
             color: initialColor,
             onChanged: (color) {
               setState(() {
@@ -130,6 +225,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
               });
             },
           );
+          return _preloadedColorPicker;
         },
       ),
     );
