@@ -95,6 +95,7 @@ class ActionAddNewShape implements Action {
   void undo() {
     appData.shapesList.remove(newShape);
     appData.forceNotifyListeners();
+    appData.selectedShapeIndex = -1;
   }
 
   @override
@@ -103,3 +104,31 @@ class ActionAddNewShape implements Action {
     appData.forceNotifyListeners();
   }
 }
+
+class ActionRemoveShape implements Action {
+  final AppData appData;
+  final Shape removedShape;
+  int removedShapeIndex = -1;
+
+  ActionRemoveShape(this.appData, this.removedShape);
+
+  @override
+  void undo() {
+    if (removedShapeIndex != -1) {
+      appData.shapesList.insert(removedShapeIndex, removedShape);
+      appData.forceNotifyListeners();
+      appData.selectedShapeIndex = -1;
+    }
+  }
+
+  @override
+  void redo() {
+    removedShapeIndex = appData.shapesList.indexOf(removedShape);
+    if (removedShapeIndex != -1) {
+      appData.shapesList.remove(removedShape);
+      appData.forceNotifyListeners();
+      appData.selectedShapeIndex = -1;
+    }
+  }
+}
+

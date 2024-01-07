@@ -1,3 +1,4 @@
+import 'package:editor_base/app_click_selector.dart';
 import 'package:flutter/material.dart';
 import 'app_data_actions.dart';
 import 'util_shape.dart';
@@ -19,21 +20,38 @@ class AppData with ChangeNotifier {
   Color color1 = Colors.black;
   Color backgroundColor = Colors.black.withOpacity(0.0);
 
-  void setStrokeWidth(double value) {
-    strokeWidth = value;
-  }
 
   void setBackgroundColor(Color value) {
     backgroundColor = value;
     notifyListeners();
   }
 
-  void setSelectedColor(Color value) {
-    color1 = value;
-    notifyListeners();
+  void setStrokeWidth(double value) {
+  strokeWidth = value;
+  if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+    shapesList[selectedShapeIndex].setStrokeWidth(value);
   }
+  notifyListeners();
+}
+
+void setSelectedColor(Color value) {
+  color1 = value;
+  if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+    shapesList[selectedShapeIndex].setColor(value);
+  }
+  notifyListeners();
+}
 
   int selectedShapeIndex = -1;
+  int shapeSelectedPrevious = -1;
+
+  Future<void> selectShapeAtPosition(Offset docPosition, Offset localPosition,
+      BoxConstraints constraints, Offset center) async {
+    shapeSelectedPrevious = selectedShapeIndex;
+    selectedShapeIndex = -1;
+    selectShape(await AppClickSelector.selectShapeAtPosition(
+        this, docPosition, localPosition, constraints, center));
+  }
 
   bool readyExample = false;
   late dynamic dataExample;
@@ -119,5 +137,12 @@ class AppData with ChangeNotifier {
 
   void selectShape(int index) {
     selectedShapeIndex = index;
+    if (index >= 0 && index < shapesList.length) {
+    Shape selectedShape = shapesList[index];
+    setStrokeWidth(selectedShape.stroke);
+    setSelectedColor(selectedShape.color);
+  }
+  notifyListeners();
+    
   }
 }

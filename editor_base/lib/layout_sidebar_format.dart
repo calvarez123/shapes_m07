@@ -76,7 +76,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                         children: [
                           CDKButtonColor(
                             key: _anchorColorButton,
-                            color: _valueColorNotifier.value,
+                            color: appData.color1,
                             onPressed: () {
                               _showPopoverColor(context, _anchorColorButton);
                             },

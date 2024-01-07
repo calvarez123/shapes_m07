@@ -15,8 +15,7 @@ class LayoutSidebarShapes extends StatelessWidget {
       builder: (context, appData, _) {
         Color customAccentColor = Color.fromARGB(255, 183, 182, 182);
         double itemHeight =
-            100.0; // Ajusta la altura de cada elemento de la lista según tus necesidades
-
+            100.0;
         return SizedBox(
           width: double.infinity,
           child: Container(
@@ -36,7 +35,6 @@ class LayoutSidebarShapes extends StatelessWidget {
                     itemBuilder: (context, index) {
                       Shape shape = appData.shapesList[index];
                       bool isSelected = index == appData.selectedShapeIndex;
-
                       return GestureDetector(
                         onTap: () {
                           if (isSelected) {
