@@ -300,8 +300,8 @@ class LayoutDesignState extends State<LayoutDesign> {
         return SystemMouseCursors.precise;
       case "view_grab":
         return isMouseButtonPressed
-            ? SystemMouseCursors.allScroll
-            : SystemMouseCursors.move;
+            ? SystemMouseCursors.grabbing
+            : SystemMouseCursors.grab;
       default:
         return SystemMouseCursors.click; // Cursor predeterminado
     }

@@ -34,6 +34,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           double labelsWidth = constraints.maxWidth * 0.5;
+          bool _isSwitched = false;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -92,7 +93,30 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    alignment: Alignment.centerRight,
+                    width: labelsWidth,
+                    child: Text("Enable Feature:", style: font),
+                  ),
+                  const SizedBox(width: 4),
+                  CDKButtonCheckBox(
+                    value: _isSwitched,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isSwitched = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 16),
+
               // Nueva sección para mostrar las coordenadas
               _buildCoordinatesSection(),
             ],
@@ -127,9 +151,8 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Coordinates:",
-              style:
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          const Text("Coordinates:",
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -137,7 +160,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
               Container(
                 alignment: Alignment.centerRight,
                 width: 100, // Ancho para el label "Offset X"
-                child: Text("Offset X:", style: const TextStyle(fontSize: 12)),
+                child: const Text("Offset X:", style: TextStyle(fontSize: 12)),
               ),
               const SizedBox(width: 4),
               Text("${selectedShape.position.dx.toStringAsFixed(2)}px",
@@ -151,7 +174,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
               Container(
                 alignment: Alignment.centerRight,
                 width: 100, // Ancho para el label "Offset Y"
-                child: Text("Offset Y:", style: const TextStyle(fontSize: 12)),
+                child: const Text("Offset Y:", style: TextStyle(fontSize: 12)),
               ),
               const SizedBox(width: 4),
               Text("${selectedShape.position.dy.toStringAsFixed(2)}px",
@@ -168,9 +191,8 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Coordinates:",
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const Text("Coordinates:",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -179,10 +201,10 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   alignment: Alignment.centerRight,
                   width: 100,
                   child:
-                      Text("Offset X:", style: const TextStyle(fontSize: 12)),
+                      const Text("Offset X:", style: TextStyle(fontSize: 12)),
                 ),
                 const SizedBox(width: 4),
-                Text("N/A", style: const TextStyle(fontSize: 12)),
+                const Text("N/A", style: TextStyle(fontSize: 12)),
               ],
             ),
             const SizedBox(height: 4),

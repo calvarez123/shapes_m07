@@ -163,6 +163,9 @@ class LayoutDesignPainter extends CustomPainter {
         y = shape.position.dy + shape.vertices[i].dy;
         path.lineTo(x, y);
       }
+      if (shape.closed) {
+        path.close();
+      }
       canvas.drawPath(path, paint);
     }
   }
@@ -210,14 +213,18 @@ class LayoutDesignPainter extends CustomPainter {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2.0;
 
-          double x = shape.position.dx + shape.vertices[0].dx;
-          double y = shape.position.dy + shape.vertices[0].dy;
-          double width = shape.scale.width;
-          double height = shape.scale.height;
+          double x =
+              shape.position.dx + shape.vertices[0].dx - (shape.stroke / 2);
+          double y =
+              shape.position.dy + shape.vertices[0].dy - (shape.stroke / 2);
+          double width = shape.scale.width + (shape.stroke / 2);
+          double height = shape.scale.height + (shape.stroke / 2);
 
           for (int i = 0; i < shape.vertices.length; i++) {
-            double vertexX = shape.position.dx + shape.vertices[i].dx;
-            double vertexY = shape.position.dy + shape.vertices[i].dy;
+            double vertexX =
+                shape.position.dx + shape.vertices[i].dx - (shape.stroke / 2);
+            double vertexY =
+                shape.position.dy + shape.vertices[i].dy - (shape.stroke / 2);
             if (i == 0) {
               x = vertexX;
               y = vertexY;
@@ -266,10 +273,12 @@ class LayoutDesignPainter extends CustomPainter {
           ..style = PaintingStyle.fill;
 
         Shape selectedShape = appData.shapesList[selectedIndex];
-        double x = selectedShape.position.dx;
-        double y = selectedShape.position.dy;
-        double width = selectedShape.vertices[0].dx;
-        double height = selectedShape.vertices[0].dy;
+        double x = selectedShape.position.dx - (selectedShape.stroke / 2);
+        double y = selectedShape.position.dy - (selectedShape.stroke / 2);
+        double width =
+            selectedShape.vertices[0].dx + (selectedShape.stroke / 2);
+        double height =
+            selectedShape.vertices[0].dy + (selectedShape.stroke / 2);
 
         for (int i = 1; i < selectedShape.vertices.length; i++) {
           double vertexX =

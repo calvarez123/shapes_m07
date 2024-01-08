@@ -16,7 +16,7 @@ class AppData with ChangeNotifier {
   Shape newShape = Shape();
   List<Shape> shapesList = [];
 
-  double strokeWidth = 1;
+  double strokeWidth = 5;
   Color color1 = Colors.black;
   Color backgroundColor = Colors.black.withOpacity(0.0);
 
