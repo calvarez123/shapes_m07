@@ -153,3 +153,25 @@ class ActionMoveShape implements Action {
     appData.forceNotifyListeners();
   }
 }
+
+class ActionColorShape implements Action {
+  final AppData appData;
+  final int shapeIndex;
+  final Color previousColor;
+  final Color actualColor;
+
+  ActionColorShape(
+      this.appData, this.shapeIndex, this.previousColor, this.actualColor);
+
+  @override
+  void undo() {
+    appData.shapesList[shapeIndex].color = previousColor;
+    appData.forceNotifyListeners();
+  }
+
+  @override
+  void redo() {
+    appData.shapesList[shapeIndex].color = actualColor;
+    appData.forceNotifyListeners();
+  }
+}

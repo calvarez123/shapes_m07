@@ -12,6 +12,8 @@ class Shape {
 
   bool closed = false;
 
+  Color fillcolor = Color(0x00000000);
+
   Shape();
 
   void setclosed(bool valor) {
