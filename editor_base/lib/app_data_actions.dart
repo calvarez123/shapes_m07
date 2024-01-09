@@ -219,3 +219,25 @@ class ActionClosedShape implements Action {
     appData.forceNotifyListeners();
   }
 }
+
+class ActionFillColorShape implements Action {
+  final AppData appData;
+  final int shapeIndex;
+  final Color previousFillColor;
+  final Color actualFillColor;
+
+  ActionFillColorShape(this.appData, this.previousFillColor,
+      this.actualFillColor, this.shapeIndex);
+
+  @override
+  void undo() {
+    appData.shapesList[shapeIndex].fillColor = previousFillColor;
+    appData.forceNotifyListeners();
+  }
+
+  @override
+  void redo() {
+    appData.shapesList[shapeIndex].fillColor = actualFillColor;
+    appData.forceNotifyListeners();
+  }
+}

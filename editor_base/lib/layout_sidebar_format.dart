@@ -163,27 +163,6 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
     );
   }
 
-  _showPopoverColor(BuildContext context, GlobalKey anchorKey) {
-    final GlobalKey<CDKDialogPopoverArrowedState> key = GlobalKey();
-    if (anchorKey.currentContext == null) {
-      // ignore: avoid_print
-      print("Error: anchorKey not assigned to a widget");
-      return;
-    }
-    CDKDialogsManager.showPopoverArrowed(
-      key: key,
-      context: context,
-      anchorKey: anchorKey,
-      isAnimated: true,
-      isTranslucent: false,
-      onHide: () {
-        appData.hide = true;
-        appData.setSelectedColor(_valueColorNotifier.value);
-      },
-      child: _preloadedColorPicker,
-    );
-  }
-
   Widget _buildCoordinatesSection() {
     // Mostrar la sección solo si hay un shape seleccionado
     if (appData.selectedShapeIndex != -1) {
@@ -268,6 +247,27 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
     }
   }
 
+  _showPopoverColor(BuildContext context, GlobalKey anchorKey) {
+    final GlobalKey<CDKDialogPopoverArrowedState> key = GlobalKey();
+    if (anchorKey.currentContext == null) {
+      // ignore: avoid_print
+      print("Error: anchorKey not assigned to a widget");
+      return;
+    }
+    CDKDialogsManager.showPopoverArrowed(
+      key: key,
+      context: context,
+      anchorKey: anchorKey,
+      isAnimated: true,
+      isTranslucent: false,
+      onHide: () {
+        appData.hide = true;
+        appData.setSelectedColor(_valueColorNotifier.value);
+      },
+      child: _preloadedColorPicker,
+    );
+  }
+
   Widget _buildPreloadedColorPicker() {
     AppData appData = Provider.of<AppData>(context);
     return Padding(
@@ -275,7 +275,6 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       child: ValueListenableBuilder<Color>(
         valueListenable: _valueColorNotifier,
         builder: (context, value, child) {
-          // Inicializar el color con la opacidad máxima
           Color initialColor = Color.fromARGB(255, 255, 255, 255);
           _preloadedColorPicker = CDKPickerColor(
             color: initialColor,
@@ -299,7 +298,6 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       child: ValueListenableBuilder<Color>(
         valueListenable: _valueFillColorNotifier,
         builder: (context, value, child) {
-          // Inicializar el color con la opacidad máxima
           Color initialColor = Color.fromARGB(255, 255, 255, 255);
           _preloadedFillColorPicker = CDKPickerColor(
             color: initialColor,
@@ -329,7 +327,12 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       anchorKey: anchorKey,
       isAnimated: true,
       isTranslucent: false,
-      onHide: () {},
+      onHide: () {
+        if (appData.selectedShapeIndex != -1) {
+          appData.hidefillcolor = true;
+          appData.setSelectedFillColor(_valueFillColorNotifier.value);
+        }
+      },
       child: _preloadedFillColorPicker,
     );
   }

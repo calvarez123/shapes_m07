@@ -17,8 +17,10 @@ class AppData with ChangeNotifier {
   List<Shape> shapesList = [];
   bool hide = false;
   Color previousColor = Colors.black;
+  Color previousFillColor = Colors.black;
 
   bool isSwitched = false;
+  bool hidefillcolor = false;
 
   double strokeWidth = 5;
   Color color1 = Colors.black;
@@ -66,10 +68,15 @@ class AppData with ChangeNotifier {
   }
 
   void setSelectedFillColor(Color value) {
-    fillcolor = value;
     if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
       shapesList[selectedShapeIndex].setFillColor(value);
     }
+    if (hidefillcolor == true) {
+      actionManager.register(ActionFillColorShape(
+          this, previousFillColor, value, selectedShapeIndex));
+      hidefillcolor = false;
+    }
+    fillcolor = value;
     notifyListeners();
   }
 
@@ -176,6 +183,7 @@ class AppData with ChangeNotifier {
       setSelectedFillColor(selectedShape.fillColor);
       isSwitched = selectedShape.closed;
       previousColor = selectedShape.color;
+      previousFillColor = selectedShape.fillColor;
     }
     notifyListeners();
   }
