@@ -34,7 +34,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           double labelsWidth = constraints.maxWidth * 0.5;
-          bool _isSwitched = false;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -105,10 +105,10 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   ),
                   const SizedBox(width: 4),
                   CDKButtonCheckBox(
-                    value: _isSwitched,
-                    onChanged: (bool? value) {
+                    value: appData.isSwitched,
+                    onChanged: (bool value) {
                       setState(() {
-                        _isSwitched = value!;
+                        appData.setClosedSelectShape(value);
                       });
                     },
                   ),
@@ -215,10 +215,10 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   alignment: Alignment.centerRight,
                   width: 100,
                   child:
-                      Text("Offset Y:", style: const TextStyle(fontSize: 12)),
+                      const Text("Offset Y:", style: TextStyle(fontSize: 12)),
                 ),
                 const SizedBox(width: 4),
-                Text("N/A", style: const TextStyle(fontSize: 12)),
+                const Text("N/A", style: TextStyle(fontSize: 12)),
               ],
             ),
             const SizedBox(height: 8),

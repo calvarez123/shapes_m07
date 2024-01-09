@@ -16,6 +16,8 @@ class AppData with ChangeNotifier {
   Shape newShape = Shape();
   List<Shape> shapesList = [];
 
+  bool isSwitched = false;
+
   double strokeWidth = 5;
   Color color1 = Colors.black;
   Color backgroundColor = Colors.black.withOpacity(0.0);
@@ -29,6 +31,14 @@ class AppData with ChangeNotifier {
     strokeWidth = value;
     if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
       shapesList[selectedShapeIndex].setStrokeWidth(value);
+    }
+    notifyListeners();
+  }
+
+  void setClosedSelectShape(bool value) {
+    isSwitched = value;
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setclosed(value);
     }
     notifyListeners();
   }
@@ -111,6 +121,7 @@ class AppData with ChangeNotifier {
     newShape.addPoint(Offset(0, 0));
     newShape.setStrokeWidth(strokeWidth);
     newShape.setColor(color1);
+    newShape.setclosed(isSwitched);
     notifyListeners();
   }
 
