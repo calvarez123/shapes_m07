@@ -122,10 +122,18 @@ class AppClickSelector {
     Color tmpStroke = shape.color;
     shape.color = Colors.black;
 
+    Color tmpFill = shape.fillColor;
+    if (tmpFill.alpha != 0) {
+      print("entre");
+      shape.fillColor = appData.fillcolor;
+    }
+
     // Dibuixa el poligon que s'està afegint
     LayoutDesignPainter.paintShape(canvas, shape);
 
     shape.color = tmpStroke;
+    double tmpStrokeWidth = shape.stroke;
+    shape.fillColor = tmpFill;
 
     // Restaura l'estat previ
     canvas.restore();

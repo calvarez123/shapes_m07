@@ -12,7 +12,7 @@ class Shape {
 
   bool closed = false;
 
-  Color fillcolor = Color(0x00000000);
+  Color fillColor = Color(0x00000000);
 
   Shape();
 
@@ -22,6 +22,10 @@ class Shape {
 
   void setColor(Color newColor) {
     color = newColor;
+  }
+
+  void setFillColor(Color newColor) {
+    fillColor = newColor;
   }
 
   void setStrokeWidth(double size) {

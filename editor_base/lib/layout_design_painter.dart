@@ -153,6 +153,7 @@ class LayoutDesignPainter extends CustomPainter {
       Paint paint = Paint();
       paint.color = shape.color;
       paint.style = PaintingStyle.stroke;
+
       paint.strokeWidth = shape.stroke;
       double x = shape.position.dx + shape.vertices[0].dx;
       double y = shape.position.dy + shape.vertices[0].dy;
@@ -166,6 +167,7 @@ class LayoutDesignPainter extends CustomPainter {
       if (shape.closed) {
         path.close();
       }
+
       canvas.drawPath(path, paint);
     }
   }

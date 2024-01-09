@@ -161,7 +161,7 @@ class ActionColorShape implements Action {
   final Color actualColor;
 
   ActionColorShape(
-      this.appData, this.shapeIndex, this.previousColor, this.actualColor);
+      this.appData, this.previousColor, this.actualColor, this.shapeIndex);
 
   @override
   void undo() {
@@ -172,6 +172,28 @@ class ActionColorShape implements Action {
   @override
   void redo() {
     appData.shapesList[shapeIndex].color = actualColor;
+    appData.forceNotifyListeners();
+  }
+}
+
+class ActionWidthShape implements Action {
+  final AppData appData;
+  final int shapeIndex;
+  final double previousStroke;
+  final double actualStroke;
+
+  ActionWidthShape(
+      this.appData, this.previousStroke, this.actualStroke, this.shapeIndex);
+
+  @override
+  void undo() {
+    appData.shapesList[shapeIndex].stroke = previousStroke;
+    appData.forceNotifyListeners();
+  }
+
+  @override
+  void redo() {
+    appData.shapesList[shapeIndex].stroke = actualStroke;
     appData.forceNotifyListeners();
   }
 }

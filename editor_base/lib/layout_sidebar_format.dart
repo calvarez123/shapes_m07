@@ -1,5 +1,6 @@
 import 'package:editor_base/util_shape.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_cupertino_desktop_kit/cdk.dart';
 import 'package:provider/provider.dart';
 import 'app_data.dart';
@@ -16,7 +17,15 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
   final GlobalKey<CDKDialogPopoverArrowedState> _anchorColorButton =
       GlobalKey();
   final ValueNotifier<Color> _valueColorNotifier =
-      ValueNotifier(const Color(0x800080FF));
+      ValueNotifier(Color.fromARGB(128, 255, 255, 255));
+
+  late Widget _preloadedFillColorPicker;
+
+  final ValueNotifier<Color> _valueFillColorNotifier =
+      ValueNotifier(Color.fromARGB(128, 255, 255, 255));
+
+  final GlobalKey<CDKDialogPopoverArrowedState> _anchorFillColorButton =
+      GlobalKey();
 
   late AppData appData;
 
@@ -24,6 +33,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
   Widget build(BuildContext context) {
     appData = Provider.of<AppData>(context);
     _preloadedColorPicker = _buildPreloadedColorPicker();
+    _preloadedFillColorPicker = _buildPreloadedFillColorPicker();
 
     TextStyle fontBold =
         const TextStyle(fontSize: 12, fontWeight: FontWeight.bold);
@@ -114,8 +124,35 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
 
-              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    alignment: Alignment.centerRight,
+                    width: labelsWidth,
+                    child: Text("Fill color:", style: font),
+                  ),
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CDKButtonColor(
+                          key: _anchorFillColorButton,
+                          color: appData.fillcolor,
+                          onPressed: () {
+                            _showPopoverFillColor(
+                                context, _anchorFillColorButton);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
 
               // Nueva sección para mostrar las coordenadas
               _buildCoordinatesSection(),
@@ -139,8 +176,11 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
       anchorKey: anchorKey,
       isAnimated: true,
       isTranslucent: false,
-      onHide: () {},
-      child: _preloadedColorPicker ?? _buildPreloadedColorPicker(),
+      onHide: () {
+        appData.hide = true;
+        appData.setSelectedColor(_valueColorNotifier.value);
+      },
+      child: _preloadedColorPicker,
     );
   }
 
@@ -236,8 +276,7 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
         valueListenable: _valueColorNotifier,
         builder: (context, value, child) {
           // Inicializar el color con la opacidad máxima
-          Color initialColor =
-              Color.fromARGB(255, value.red, value.green, value.blue);
+          Color initialColor = Color.fromARGB(255, 255, 255, 255);
           _preloadedColorPicker = CDKPickerColor(
             color: initialColor,
             onChanged: (color) {
@@ -250,6 +289,48 @@ class LayoutSidebarFormatState extends State<LayoutSidebarFormat> {
           return _preloadedColorPicker;
         },
       ),
+    );
+  }
+
+  Widget _buildPreloadedFillColorPicker() {
+    AppData appData = Provider.of<AppData>(context);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ValueListenableBuilder<Color>(
+        valueListenable: _valueFillColorNotifier,
+        builder: (context, value, child) {
+          // Inicializar el color con la opacidad máxima
+          Color initialColor = Color.fromARGB(255, 255, 255, 255);
+          _preloadedFillColorPicker = CDKPickerColor(
+            color: initialColor,
+            onChanged: (color) {
+              setState(() {
+                _valueFillColorNotifier.value = color;
+                appData.setSelectedFillColor(color);
+              });
+            },
+          );
+          return _preloadedFillColorPicker;
+        },
+      ),
+    );
+  }
+
+  _showPopoverFillColor(BuildContext context, GlobalKey anchorKey) {
+    final GlobalKey<CDKDialogPopoverArrowedState> key = GlobalKey();
+    if (anchorKey.currentContext == null) {
+      // ignore: avoid_print
+      print("Error: anchorKey not assigned to a widget");
+      return;
+    }
+    CDKDialogsManager.showPopoverArrowed(
+      key: key,
+      context: context,
+      anchorKey: anchorKey,
+      isAnimated: true,
+      isTranslucent: false,
+      onHide: () {},
+      child: _preloadedFillColorPicker,
     );
   }
 }

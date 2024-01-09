@@ -15,11 +15,16 @@ class AppData with ChangeNotifier {
   String toolSelected = "shape_drawing";
   Shape newShape = Shape();
   List<Shape> shapesList = [];
+  bool hide = false;
+  Color previousColor = Colors.black;
 
   bool isSwitched = false;
 
   double strokeWidth = 5;
   Color color1 = Colors.black;
+
+  Color fillcolor = Colors.black;
+
   Color backgroundColor = Colors.black.withOpacity(0.0);
 
   void setBackgroundColor(Color value) {
@@ -28,10 +33,12 @@ class AppData with ChangeNotifier {
   }
 
   void setStrokeWidth(double value) {
-    strokeWidth = value;
     if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
       shapesList[selectedShapeIndex].setStrokeWidth(value);
+      actionManager.register(
+          ActionWidthShape(this, strokeWidth, value, selectedShapeIndex));
     }
+    strokeWidth = value;
     notifyListeners();
   }
 
@@ -44,9 +51,22 @@ class AppData with ChangeNotifier {
   }
 
   void setSelectedColor(Color value) {
-    color1 = value;
     if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
       shapesList[selectedShapeIndex].setColor(value);
+    }
+    if (hide == true) {
+      actionManager.register(
+          ActionColorShape(this, previousColor, value, selectedShapeIndex));
+      hide = false;
+    }
+    color1 = value;
+    notifyListeners();
+  }
+
+  void setSelectedFillColor(Color value) {
+    fillcolor = value;
+    if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
+      shapesList[selectedShapeIndex].setFillColor(value);
     }
     notifyListeners();
   }
@@ -122,6 +142,7 @@ class AppData with ChangeNotifier {
     newShape.setStrokeWidth(strokeWidth);
     newShape.setColor(color1);
     newShape.setclosed(isSwitched);
+    newShape.setFillColor(fillcolor);
     notifyListeners();
   }
 
@@ -151,6 +172,8 @@ class AppData with ChangeNotifier {
       Shape selectedShape = shapesList[index];
       setStrokeWidth(selectedShape.stroke);
       setSelectedColor(selectedShape.color);
+      setSelectedFillColor(selectedShape.fillColor);
+      previousColor = selectedShape.color;
     }
     notifyListeners();
   }
