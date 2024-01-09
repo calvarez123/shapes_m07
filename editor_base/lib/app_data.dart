@@ -43,10 +43,12 @@ class AppData with ChangeNotifier {
   }
 
   void setClosedSelectShape(bool value) {
-    isSwitched = value;
     if (selectedShapeIndex >= 0 && selectedShapeIndex < shapesList.length) {
       shapesList[selectedShapeIndex].setclosed(value);
+      actionManager.register(
+          ActionClosedShape(this, isSwitched, value, selectedShapeIndex));
     }
+    isSwitched = value;
     notifyListeners();
   }
 
@@ -142,7 +144,6 @@ class AppData with ChangeNotifier {
     newShape.setStrokeWidth(strokeWidth);
     newShape.setColor(color1);
     newShape.setclosed(isSwitched);
-    newShape.setFillColor(fillcolor);
     notifyListeners();
   }
 
@@ -173,6 +174,7 @@ class AppData with ChangeNotifier {
       setStrokeWidth(selectedShape.stroke);
       setSelectedColor(selectedShape.color);
       setSelectedFillColor(selectedShape.fillColor);
+      isSwitched = selectedShape.closed;
       previousColor = selectedShape.color;
     }
     notifyListeners();

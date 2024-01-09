@@ -197,3 +197,25 @@ class ActionWidthShape implements Action {
     appData.forceNotifyListeners();
   }
 }
+
+class ActionClosedShape implements Action {
+  final AppData appData;
+  final int shapeIndex;
+  final bool actualClosedState;
+  final bool previousClosedState;
+
+  ActionClosedShape(this.appData, this.previousClosedState,
+      this.actualClosedState, this.shapeIndex);
+
+  @override
+  void undo() {
+    appData.shapesList[shapeIndex].closed = previousClosedState;
+    appData.forceNotifyListeners();
+  }
+
+  @override
+  void redo() {
+    appData.shapesList[shapeIndex].closed = actualClosedState;
+    appData.forceNotifyListeners();
+  }
+}

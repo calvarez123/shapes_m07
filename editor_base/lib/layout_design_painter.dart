@@ -151,22 +151,34 @@ class LayoutDesignPainter extends CustomPainter {
   static void paintShape(Canvas canvas, Shape shape) {
     if (shape.vertices.isNotEmpty) {
       Paint paint = Paint();
-      paint.color = shape.color;
-      paint.style = PaintingStyle.stroke;
+      paint.color = shape
+          .fillColor; // Usar el color de fondo para llenar el interior de la forma
+      paint.style = PaintingStyle
+          .fill; // Cambiar a PaintingStyle.fill para llenar el interior
 
-      paint.strokeWidth = shape.stroke;
       double x = shape.position.dx + shape.vertices[0].dx;
       double y = shape.position.dy + shape.vertices[0].dy;
       Path path = Path();
       path.moveTo(x, y);
+
       for (int i = 1; i < shape.vertices.length; i++) {
         x = shape.position.dx + shape.vertices[i].dx;
         y = shape.position.dy + shape.vertices[i].dy;
         path.lineTo(x, y);
       }
+
       if (shape.closed) {
         path.close();
       }
+
+      // Llena el interior de la forma con el color de fondo
+      canvas.drawPath(path, paint);
+
+      // Dibuja el contorno de la forma
+      paint = Paint();
+      paint.color = shape.color;
+      paint.style = PaintingStyle.stroke;
+      paint.strokeWidth = shape.stroke;
 
       canvas.drawPath(path, paint);
     }
