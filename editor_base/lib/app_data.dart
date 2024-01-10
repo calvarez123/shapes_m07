@@ -1,3 +1,4 @@
+import 'package:editor_base/ShapeDrawing.dart';
 import 'package:editor_base/app_click_selector.dart';
 import 'package:flutter/material.dart';
 import 'app_data_actions.dart';
@@ -13,7 +14,7 @@ class AppData with ChangeNotifier {
   double zoom = 95;
   Size docSize = const Size(500, 400);
   String toolSelected = "shape_drawing";
-  Shape newShape = Shape();
+  Shape newShape = ShapeDrawing(); // AQUI PONER LA TOOL SELECCIONADA
   List<Shape> shapesList = [];
   bool hide = false;
   Color previousColor = Colors.black;
@@ -145,7 +146,8 @@ class AppData with ChangeNotifier {
   }
 
   void addNewShape(Offset position) {
-    newShape = Shape();
+    newShape =
+        ShapeDrawing(); // AQUI PONER LA TOOL SELECCIONADA podriamos hacer aqui la eleccion de shpape
     newShape.setPosition(position);
     newShape.addPoint(Offset(0, 0));
     newShape.setStrokeWidth(strokeWidth);
@@ -164,7 +166,7 @@ class AppData with ChangeNotifier {
     if (newShape.vertices.length >= 2) {
       double strokeWidthConfig = newShape.stroke;
       actionManager.register(ActionAddNewShape(this, newShape));
-      newShape = Shape();
+      newShape = ShapeDrawing(); // AQUI PONER LA TOOL SELECCIONADA
       newShape.setStrokeWidth(strokeWidthConfig);
     }
   }

@@ -1,4 +1,6 @@
+import 'package:editor_base/ShapeLine.dart';
 import 'package:editor_base/app_data_actions.dart';
+import 'package:editor_base/util_shape.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,8 @@ class LayoutDesignState extends State<LayoutDesign> {
   final FocusNode _focusNode = FocusNode();
   Offset _dragStartPosition = Offset.zero;
   Offset _dragStartOffset = Offset.zero;
+  Offset? _startPoint;
+  Offset? _endPoint;
 
   @override
   void initState() {
@@ -165,6 +169,22 @@ class LayoutDesignState extends State<LayoutDesign> {
                       _dragStartOffset = docPosition - _dragStartPosition;
                     }
                   }
+                  /*
+                  if (appData.toolSelected == "shape_line") {
+                    _startPoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+                    _endPoint = _startPoint;
+                    setState(() {});
+                  }
+                  */
                   setState(() {});
                 },
                 onPointerMove: (event) {
@@ -197,6 +217,24 @@ class LayoutDesignState extends State<LayoutDesign> {
                       appData.updateShapePosition(newShapePosition);
                     }
                   }
+                  /*
+                  if (appData.toolSelected == "shape_line" &&
+                      _startPoint != null) {
+                    setState(() {
+                      _endPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+                    });
+                  }
+
+                  */
 
                   if (_isMouseButtonPressed &&
                       appData.toolSelected == "view_grab") {
@@ -241,6 +279,23 @@ class LayoutDesignState extends State<LayoutDesign> {
                     );
                     appData.actionManager.register(action);
                   }
+                  /*
+                  if (appData.toolSelected == "shape_line" &&
+                      _startPoint != null) {
+                    // Agrega la línea a tu lista de formas o realiza la lógica necesaria
+                    Shape line = ShapeLine()
+                      ..addPoint(_startPoint!)
+                      ..addPoint(_endPoint!)
+                      ..setColor(appData.color1)
+                      ..setStrokeWidth(appData.strokeWidth);
+
+                    appData.addNewShape(line);
+
+                    _startPoint = null;
+                    _endPoint = null;
+                    setState(() {});
+                  }
+                  */
                   setState(() {});
                 },
                 onPointerSignal: (pointerSignal) {
@@ -302,6 +357,14 @@ class LayoutDesignState extends State<LayoutDesign> {
         return isMouseButtonPressed
             ? SystemMouseCursors.grabbing
             : SystemMouseCursors.grab;
+      case "shape_line":
+        return SystemMouseCursors.precise; // Cambiado a precise
+      case "shape_multiline":
+        return SystemMouseCursors.precise; // Cambiado a precise
+      case "shape_rectangle":
+        return SystemMouseCursors.precise; // Cambiado a precise
+      case "shape_ellipsis":
+        return SystemMouseCursors.precise; // Cambiado a precise
       default:
         return SystemMouseCursors.click; // Cursor predeterminado
     }
