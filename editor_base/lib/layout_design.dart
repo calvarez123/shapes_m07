@@ -26,8 +26,8 @@ class LayoutDesignState extends State<LayoutDesign> {
   final FocusNode _focusNode = FocusNode();
   Offset _dragStartPosition = Offset.zero;
   Offset _dragStartOffset = Offset.zero;
-  Offset? _startPoint;
-  Offset? _endPoint;
+  Offset _startpoint = Offset.zero;
+  Offset _endpoint = Offset.zero;
 
   @override
   void initState() {
@@ -159,6 +159,19 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
+                  } else if (appData.toolSelected == "shape_line") {
+                    _startpoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+                    _endpoint = _startpoint;
+                    setState(() {});
                   } else if (appData.toolSelected == "pointer_shapes") {
                     await appData.selectShapeAtPosition(docPosition,
                         event.localPosition, constraints, _scrollCenter);
@@ -170,20 +183,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     }
                   }
                   /*
-                  if (appData.toolSelected == "shape_line") {
-                    _startPoint = _getDocPosition(
-                      event.localPosition,
-                      appData.zoom,
-                      constraints.maxWidth,
-                      constraints.maxHeight,
-                      appData.docSize.width,
-                      appData.docSize.height,
-                      _scrollCenter.dx,
-                      _scrollCenter.dy,
-                    );
-                    _endPoint = _startPoint;
-                    setState(() {});
-                  }
+                  
                   */
                   setState(() {});
                 },
@@ -253,6 +253,18 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                   if (appData.toolSelected == "shape_drawing") {
                     appData.addNewShapeToShapesList();
+                  } else if (appData.toolSelected == "shape_line") {
+                    Size docSize =
+                        Size(appData.docSize.width, appData.docSize.height);
+                    appData.addRelativePointToNewShape(_getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        docSize.width,
+                        docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy));
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
