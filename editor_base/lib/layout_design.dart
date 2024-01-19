@@ -253,7 +253,10 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                   if (appData.toolSelected == "shape_drawing") {
                     appData.addNewShapeToShapesList();
-                  } else if (appData.toolSelected == "shape_line") {
+                  } /*
+                  con esto hago la tool de dibujar si se seleciona el de las peqeñas lineas
+                  
+                  else if (appData.toolSelected == "shape_line") {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
                     appData.addRelativePointToNewShape(_getDocPosition(
@@ -265,7 +268,8 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
-                  } else if (appData.toolSelected == "pointer_shapes" &&
+                  } */
+                  else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
