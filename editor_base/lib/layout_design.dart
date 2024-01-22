@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:editor_base/ShapeLine.dart';
 import 'package:editor_base/app_data_actions.dart';
 import 'package:editor_base/util_shape.dart';
@@ -30,7 +28,6 @@ class LayoutDesignState extends State<LayoutDesign> {
   Offset _dragStartOffset = Offset.zero;
   Offset _startpoint = Offset.zero;
   bool paintingLine = false;
-  int clickCount = 0;
 
   @override
   void initState() {
@@ -287,10 +284,48 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
-                    onDoubleTap:
-                    (Event) {
-                      print("marica");
-                    };
+                    else if (appData.toolSelected == "shape_multiline" &&
+    paintingLine == true) {
+  Size docSize =
+      Size(appData.docSize.width, appData.docSize.height);
+  appData.addRelativePointToNewShape(_getDocPosition(
+      event.localPosition,
+      appData.zoom,
+      constraints.maxWidth,
+      constraints.maxHeight,
+      docSize.width,
+      docSize.height,
+      _scrollCenter.dx,
+      _scrollCenter.dy));
+
+  // Añadir lógica de doble clic aquí
+  int clickCount = 0;
+  Timer? _doubleTapTimer;
+
+  onDoubleTap: () {
+    setState(() {
+      clickCount++;
+      if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
+        // Se ha producido un segundo clic dentro del tiempo límite
+        _doubleTapTimer!.cancel();
+        // Acciones a realizar en un doble clic
+        paintingLine = false;
+        print("Doble clic detectado");
+        // Reiniciar el contador de clics después de manejar el doble clic
+        clickCount = 0;
+      } else {
+        // Primer clic, inicia el temporizador para esperar el segundo clic
+        _doubleTapTimer = Timer(Duration(milliseconds: 300), () {
+          // No se ha producido un segundo clic dentro del tiempo límite
+          // Realizar acciones correspondientes al clic único aquí si es necesario
+          // Reiniciar el contador de clics después de manejar el clic único
+          clickCount = 0;
+        });
+      }
+    });
+  }
+}
+
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
