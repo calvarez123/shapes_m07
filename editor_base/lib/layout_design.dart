@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:editor_base/ShapeLine.dart';
 import 'package:editor_base/app_data_actions.dart';
 import 'package:editor_base/util_shape.dart';
@@ -27,7 +29,8 @@ class LayoutDesignState extends State<LayoutDesign> {
   Offset _dragStartPosition = Offset.zero;
   Offset _dragStartOffset = Offset.zero;
   Offset _startpoint = Offset.zero;
-  Offset _endpoint = Offset.zero;
+  bool paintingLine = false;
+  int clickCount = 0;
 
   @override
   void initState() {
@@ -132,6 +135,7 @@ class LayoutDesignState extends State<LayoutDesign> {
               cursor: _getCursorForTool(
                   appData.toolSelected, _isMouseButtonPressed),
               child: Listener(
+                /*----------------------------CLICK RATON------------------------------*/
                 onPointerDown: (event) async {
                   _focusNode.requestFocus();
                   _isMouseButtonPressed = true;
@@ -170,7 +174,20 @@ class LayoutDesignState extends State<LayoutDesign> {
                       _scrollCenter.dx,
                       _scrollCenter.dy,
                     );
-                    _endpoint = _startpoint;
+                    paintingLine = true;
+                    setState(() {});
+                  } else if (appData.toolSelected == "shape_multiline") {
+                    _startpoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+                    paintingLine = true;
                     setState(() {});
                   } else if (appData.toolSelected == "pointer_shapes") {
                     await appData.selectShapeAtPosition(docPosition,
@@ -187,6 +204,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                   */
                   setState(() {});
                 },
+                /*----------------------------MOVIMIENTO RATON------------------------------*/
                 onPointerMove: (event) {
                   Offset docPosition = _getDocPosition(
                     event.localPosition,
@@ -211,31 +229,14 @@ class LayoutDesignState extends State<LayoutDesign> {
                           docSize.height,
                           _scrollCenter.dx,
                           _scrollCenter.dy));
+                    } else if (appData.toolSelected == "shape_line") {
+                      //ESTARIA BIEN MIRAR SI EL DIBUJO DE LA LINEA PUEDE IR SALIENDO MIENTRAS MUEVES EL RATON
                     } else if (appData.toolSelected == "pointer_shapes" &&
                         appData.selectedShapeIndex != -1) {
                       Offset newShapePosition = docPosition - _dragStartOffset;
                       appData.updateShapePosition(newShapePosition);
                     }
                   }
-                  /*
-                  if (appData.toolSelected == "shape_line" &&
-                      _startPoint != null) {
-                    setState(() {
-                      _endPoint = _getDocPosition(
-                        event.localPosition,
-                        appData.zoom,
-                        constraints.maxWidth,
-                        constraints.maxHeight,
-                        appData.docSize.width,
-                        appData.docSize.height,
-                        _scrollCenter.dx,
-                        _scrollCenter.dy,
-                      );
-                    });
-                  }
-
-                  */
-
                   if (_isMouseButtonPressed &&
                       appData.toolSelected == "view_grab") {
                     if (event.delta.dx != 0) {
@@ -248,15 +249,18 @@ class LayoutDesignState extends State<LayoutDesign> {
                     }
                   }
                 },
+                /*----------------------------DEJAR DE HACER CLICK AL RATON------------------------------*/
                 onPointerUp: (event) {
                   _isMouseButtonPressed = false;
 
                   if (appData.toolSelected == "shape_drawing") {
                     appData.addNewShapeToShapesList();
-                  } /*
-                  con esto hago la tool de dibujar si se seleciona el de las peqeñas lineas
-                  
-                  else if (appData.toolSelected == "shape_line") {
+                  }
+
+                  //con esto hago la tool de dibujar si se seleciona el de las peqeñas lineas
+
+                  else if (appData.toolSelected == "shape_line" &&
+                      paintingLine == true) {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
                     appData.addRelativePointToNewShape(_getDocPosition(
@@ -268,8 +272,26 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
-                  } */
-                  else if (appData.toolSelected == "pointer_shapes" &&
+                    appData.addNewShapeToShapesList();
+                    paintingLine = false;
+                  } else if (appData.toolSelected == "shape_multiline" &&
+                      paintingLine == true) {
+                    Size docSize =
+                        Size(appData.docSize.width, appData.docSize.height);
+                    appData.addRelativePointToNewShape(_getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        docSize.width,
+                        docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy));
+                    onDoubleTap:
+                    (Event) {
+                      print("marica");
+                    };
+                  } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
@@ -295,23 +317,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     );
                     appData.actionManager.register(action);
                   }
-                  /*
-                  if (appData.toolSelected == "shape_line" &&
-                      _startPoint != null) {
-                    // Agrega la línea a tu lista de formas o realiza la lógica necesaria
-                    Shape line = ShapeLine()
-                      ..addPoint(_startPoint!)
-                      ..addPoint(_endPoint!)
-                      ..setColor(appData.color1)
-                      ..setStrokeWidth(appData.strokeWidth);
 
-                    appData.addNewShape(line);
-
-                    _startPoint = null;
-                    _endPoint = null;
-                    setState(() {});
-                  }
-                  */
                   setState(() {});
                 },
                 onPointerSignal: (pointerSignal) {
