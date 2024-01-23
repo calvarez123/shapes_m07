@@ -32,6 +32,7 @@ class LayoutDesignState extends State<LayoutDesign> {
   bool paintingLine = false;
   int clickCount = 0;
   Timer? _doubleTapTimer;
+  bool paintingEllipse = false;
 
   @override
   void initState() {
@@ -165,19 +166,6 @@ class LayoutDesignState extends State<LayoutDesign> {
                         _scrollCenter.dx,
                         _scrollCenter.dy));
                   } else if (appData.toolSelected == "shape_line") {
-                    _startpoint = _getDocPosition(
-                      event.localPosition,
-                      appData.zoom,
-                      constraints.maxWidth,
-                      constraints.maxHeight,
-                      appData.docSize.width,
-                      appData.docSize.height,
-                      _scrollCenter.dx,
-                      _scrollCenter.dy,
-                    );
-                    paintingLine = true;
-
-                    setState(() {});
                   } else if (appData.toolSelected == "shape_multiline") {
                     _startpoint = _getDocPosition(
                       event.localPosition,
@@ -194,6 +182,7 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                     paintingLine = true;
                     setState(() {});
+                  } else if (appData.toolSelected == "shape_ellipsis") {
                   } else if (appData.toolSelected == "pointer_shapes") {
                     await appData.selectShapeAtPosition(docPosition,
                         event.localPosition, constraints, _scrollCenter);
@@ -266,6 +255,8 @@ class LayoutDesignState extends State<LayoutDesign> {
                       appData.newShape.vertices = [_startpoint, currentPoint];
 
                       appData.notifyListeners();
+                    } else if (appData.toolSelected == "shape_ellipsis" &&
+                        paintingEllipse) {
                     } else if (appData.toolSelected == "pointer_shapes" &&
                         appData.selectedShapeIndex != -1) {
                       Offset newShapePosition = docPosition - _dragStartOffset;
@@ -334,6 +325,8 @@ class LayoutDesignState extends State<LayoutDesign> {
                         clickCount = 0;
                       });
                     }
+                  } else if (appData.toolSelected == "shape_ellipsis" &&
+                      paintingEllipse) {
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
