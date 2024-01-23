@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:editor_base/ShapeLine.dart';
 import 'package:editor_base/app_data_actions.dart';
 import 'package:editor_base/util_shape.dart';
@@ -28,6 +30,8 @@ class LayoutDesignState extends State<LayoutDesign> {
   Offset _dragStartOffset = Offset.zero;
   Offset _startpoint = Offset.zero;
   bool paintingLine = false;
+  int clickCount = 0;
+  Timer? _doubleTapTimer;
 
   @override
   void initState() {
@@ -172,6 +176,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                       _scrollCenter.dy,
                     );
                     paintingLine = true;
+
                     setState(() {});
                   } else if (appData.toolSelected == "shape_multiline") {
                     _startpoint = _getDocPosition(
@@ -184,6 +189,9 @@ class LayoutDesignState extends State<LayoutDesign> {
                       _scrollCenter.dx,
                       _scrollCenter.dy,
                     );
+
+                    // Inicializa la lista de puntos
+
                     paintingLine = true;
                     setState(() {});
                   } else if (appData.toolSelected == "pointer_shapes") {
@@ -226,8 +234,38 @@ class LayoutDesignState extends State<LayoutDesign> {
                           docSize.height,
                           _scrollCenter.dx,
                           _scrollCenter.dy));
-                    } else if (appData.toolSelected == "shape_line") {
-                      //ESTARIA BIEN MIRAR SI EL DIBUJO DE LA LINEA PUEDE IR SALIENDO MIENTRAS MUEVES EL RATON
+                    } else if (appData.toolSelected == "shape_line" &&
+                        paintingLine == true) {
+                      Offset currentPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+
+                      appData.newShape.vertices = [_startpoint, currentPoint];
+
+                      appData.notifyListeners();
+                    } else if (appData.toolSelected == "shape_multiline" &&
+                        paintingLine == true) {
+                      Offset currentPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+
+                      appData.newShape.vertices = [_startpoint, currentPoint];
+
+                      appData.notifyListeners();
                     } else if (appData.toolSelected == "pointer_shapes" &&
                         appData.selectedShapeIndex != -1) {
                       Offset newShapePosition = docPosition - _dragStartOffset;
@@ -284,48 +322,18 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
-                    else if (appData.toolSelected == "shape_multiline" &&
-    paintingLine == true) {
-  Size docSize =
-      Size(appData.docSize.width, appData.docSize.height);
-  appData.addRelativePointToNewShape(_getDocPosition(
-      event.localPosition,
-      appData.zoom,
-      constraints.maxWidth,
-      constraints.maxHeight,
-      docSize.width,
-      docSize.height,
-      _scrollCenter.dx,
-      _scrollCenter.dy));
 
-  // Añadir lógica de doble clic aquí
-  int clickCount = 0;
-  Timer? _doubleTapTimer;
+                    if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
+                      _doubleTapTimer!.cancel();
+                      appData.addNewShapeToShapesList();
+                      paintingLine = false; // Cambiar la variable a falso
 
-  onDoubleTap: () {
-    setState(() {
-      clickCount++;
-      if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
-        // Se ha producido un segundo clic dentro del tiempo límite
-        _doubleTapTimer!.cancel();
-        // Acciones a realizar en un doble clic
-        paintingLine = false;
-        print("Doble clic detectado");
-        // Reiniciar el contador de clics después de manejar el doble clic
-        clickCount = 0;
-      } else {
-        // Primer clic, inicia el temporizador para esperar el segundo clic
-        _doubleTapTimer = Timer(Duration(milliseconds: 300), () {
-          // No se ha producido un segundo clic dentro del tiempo límite
-          // Realizar acciones correspondientes al clic único aquí si es necesario
-          // Reiniciar el contador de clics después de manejar el clic único
-          clickCount = 0;
-        });
-      }
-    });
-  }
-}
-
+                      clickCount = 0;
+                    } else {
+                      _doubleTapTimer = Timer(Duration(milliseconds: 300), () {
+                        clickCount = 0;
+                      });
+                    }
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =

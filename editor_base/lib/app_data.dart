@@ -145,6 +145,10 @@ class AppData with ChangeNotifier {
     notifyListeners();
   }
 
+  String getSelectedTool() {
+    return toolSelected;
+  }
+
   void addNewShape(Offset position) {
     newShape =
         ShapeDrawing(); // AQUI PONER LA TOOL SELECCIONADA podriamos hacer aqui la eleccion de shpape
