@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:editor_base/ShapeLine.dart';
 import 'package:editor_base/ShapeRectangle.dart';
@@ -30,11 +31,13 @@ class LayoutDesignState extends State<LayoutDesign> {
   Offset _dragStartPosition = Offset.zero;
   Offset _dragStartOffset = Offset.zero;
   Offset _startpoint = Offset.zero;
+
   bool paintingLine = false;
   int clickCount = 0;
   Timer? _doubleTapTimer;
   bool paintingEllipse = false;
-
+  Offset _ellipseStartPoint = Offset.zero;
+  bool _isDrawingEllipse = false;
   @override
   void initState() {
     super.initState();
@@ -218,8 +221,21 @@ class LayoutDesignState extends State<LayoutDesign> {
                     // Initialize the rectangle shape
 
                     setState(() {});
-                  }
-                  if (appData.toolSelected == "shape_rectangle") {
+                  } else if (appData.toolSelected == "shape_ellipsis") {
+                    _ellipseStartPoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+
+                    // Set the starting point for the ellipse drawing
+                    _isDrawingEllipse = true;
+                    appData.newShape.setclosed(true);
                   } else if (appData.toolSelected == "pointer_shapes") {
                     await appData.selectShapeAtPosition(docPosition,
                         event.localPosition, constraints, _scrollCenter);
@@ -296,8 +312,7 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                       appData.notifyListeners();
                       /*----------------------------rectangle------------------------------*/
-                    }
-                    if (paintingEllipse &&
+                    } else if (paintingEllipse &&
                         appData.toolSelected == "shape_rectangle") {
                       // Get the current position in the document
                       Offset docPosition = _getDocPosition(
@@ -317,12 +332,37 @@ class LayoutDesignState extends State<LayoutDesign> {
                         Offset(docPosition.dx, _startpoint.dy),
                         docPosition,
                         Offset(_startpoint.dx, docPosition.dy),
-                        _startpoint, // Add the starting point again to close the rectangle
+                        _startpoint,
                       ];
 
                       appData.notifyListeners();
-                    } else if (appData.toolSelected == "shape_rectangle" &&
-                        paintingEllipse == true) {
+                    } else if (_isDrawingEllipse &&
+                        appData.toolSelected == "shape_ellipsis") {
+                      Offset currentPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+
+                      double distance = sqrt(
+                          pow(currentPoint.dx - _ellipseStartPoint.dx, 2) +
+                              pow(currentPoint.dy - _ellipseStartPoint.dy, 2));
+
+                      double sensitivity = 0.02;
+                      double adjustedDistance = distance * sensitivity;
+
+                      appData.newShape.vertices = _calculateEllipseVertices(
+                        _ellipseStartPoint,
+                        adjustedDistance,
+                        appData.zoom,
+                      );
+
+                      appData.notifyListeners();
                     } else if (appData.toolSelected == "pointer_shapes" &&
                         appData.selectedShapeIndex != -1) {
                       Offset newShapePosition = docPosition - _dragStartOffset;
@@ -368,18 +408,6 @@ class LayoutDesignState extends State<LayoutDesign> {
                     paintingLine = false;
                   } else if (appData.toolSelected == "shape_multiline" &&
                       paintingLine == true) {
-                    Size docSize =
-                        Size(appData.docSize.width, appData.docSize.height);
-                    appData.addRelativePointToNewShape(_getDocPosition(
-                        event.localPosition,
-                        appData.zoom,
-                        constraints.maxWidth,
-                        constraints.maxHeight,
-                        docSize.width,
-                        docSize.height,
-                        _scrollCenter.dx,
-                        _scrollCenter.dy));
-
                     if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
                       _doubleTapTimer!.cancel();
                       appData.addNewShapeToShapesList();
@@ -402,8 +430,18 @@ class LayoutDesignState extends State<LayoutDesign> {
                     }
 
                     setState(() {});
-                  } else if (appData.toolSelected == "shape_rectangle" &&
-                      paintingEllipse == true) {
+                  }
+                  if (_isDrawingEllipse &&
+                      appData.toolSelected == "shape_ellipsis") {
+                    // Finish drawing the ellipse
+                    _isDrawingEllipse = false;
+
+                    // Optionally, add the ellipse shape to the shapes list
+                    if (appData.newShape.vertices.length >= 4) {
+                      appData.addNewShapeToShapesList();
+                    }
+
+                    setState(() {});
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
@@ -503,5 +541,25 @@ class LayoutDesignState extends State<LayoutDesign> {
       default:
         return SystemMouseCursors.click; // Cursor predeterminado
     }
+  }
+
+  List<Offset> _calculateEllipseVertices(
+    Offset center,
+    double radius,
+    double zoom,
+  ) {
+    List<Offset> vertices = [];
+
+    int segments =
+        36; // You can adjust the number of segments for a smoother ellipse
+
+    for (int i = 0; i < segments; i++) {
+      double angle = (2 * 3.14159265358979323846 * i) / segments;
+      double x = center.dx + radius * zoom * cos(angle);
+      double y = center.dy + radius * zoom * sin(angle);
+      vertices.add(Offset(x, y));
+    }
+
+    return vertices;
   }
 }
