@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:editor_base/ShapeLine.dart';
+import 'package:editor_base/ShapeRectangle.dart';
 import 'package:editor_base/app_data_actions.dart';
 import 'package:editor_base/util_shape.dart';
 import 'package:flutter/cupertino.dart';
@@ -137,7 +138,7 @@ class LayoutDesignState extends State<LayoutDesign> {
               cursor: _getCursorForTool(
                   appData.toolSelected, _isMouseButtonPressed),
               child: Listener(
-                /*----------------------------CLICK RATON------------------------------*/
+                /*------------------------------------------------CLICK RATON------------------------------*/
                 onPointerDown: (event) async {
                   _focusNode.requestFocus();
                   _isMouseButtonPressed = true;
@@ -152,7 +153,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     _scrollCenter.dx,
                     _scrollCenter.dy,
                   );
-
+                  /*----------------------------DRAWING------------------------------*/
                   if (appData.toolSelected == "shape_drawing") {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
@@ -165,7 +166,24 @@ class LayoutDesignState extends State<LayoutDesign> {
                         docSize.height,
                         _scrollCenter.dx,
                         _scrollCenter.dy));
+                    /*----------------------------lINEA------------------------------*/
                   } else if (appData.toolSelected == "shape_line") {
+                    _startpoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+
+                    // Inicializa la lista de puntos
+
+                    paintingLine = true;
+                    setState(() {});
+                    /*----------------------------MULTIlINEA------------------------------*/
                   } else if (appData.toolSelected == "shape_multiline") {
                     _startpoint = _getDocPosition(
                       event.localPosition,
@@ -182,7 +200,26 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                     paintingLine = true;
                     setState(() {});
-                  } else if (appData.toolSelected == "shape_ellipsis") {
+                    /*----------------------------rectangle------------------------------*/
+                  }
+                  if (appData.toolSelected == "shape_rectangle") {
+                    // Set the starting point for the rectangle
+                    _startpoint = _getDocPosition(
+                      event.localPosition,
+                      appData.zoom,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                      appData.docSize.width,
+                      appData.docSize.height,
+                      _scrollCenter.dx,
+                      _scrollCenter.dy,
+                    );
+                    paintingEllipse = true;
+                    // Initialize the rectangle shape
+
+                    setState(() {});
+                  }
+                  if (appData.toolSelected == "shape_rectangle") {
                   } else if (appData.toolSelected == "pointer_shapes") {
                     await appData.selectShapeAtPosition(docPosition,
                         event.localPosition, constraints, _scrollCenter);
@@ -198,7 +235,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                   */
                   setState(() {});
                 },
-                /*----------------------------MOVIMIENTO RATON------------------------------*/
+                /*---------------------------------------MOVIMIENTO RATON------------------------------*/
                 onPointerMove: (event) {
                   Offset docPosition = _getDocPosition(
                     event.localPosition,
@@ -211,6 +248,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     _scrollCenter.dy,
                   );
                   if (_isMouseButtonPressed) {
+                    /*----------------------------DRAWING------------------------------*/
                     if (appData.toolSelected == "shape_drawing") {
                       Size docSize =
                           Size(appData.docSize.width, appData.docSize.height);
@@ -223,6 +261,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                           docSize.height,
                           _scrollCenter.dx,
                           _scrollCenter.dy));
+                      /*----------------------------lINEA------------------------------*/
                     } else if (appData.toolSelected == "shape_line" &&
                         paintingLine == true) {
                       Offset currentPoint = _getDocPosition(
@@ -239,6 +278,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                       appData.newShape.vertices = [_startpoint, currentPoint];
 
                       appData.notifyListeners();
+                      /*----------------------------MULTIlINEA------------------------------*/
                     } else if (appData.toolSelected == "shape_multiline" &&
                         paintingLine == true) {
                       Offset currentPoint = _getDocPosition(
@@ -255,8 +295,34 @@ class LayoutDesignState extends State<LayoutDesign> {
                       appData.newShape.vertices = [_startpoint, currentPoint];
 
                       appData.notifyListeners();
-                    } else if (appData.toolSelected == "shape_ellipsis" &&
-                        paintingEllipse) {
+                      /*----------------------------rectangle------------------------------*/
+                    }
+                    if (paintingEllipse &&
+                        appData.toolSelected == "shape_rectangle") {
+                      // Get the current position in the document
+                      Offset docPosition = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+
+                      // Update the rectangle shape based on the current position
+                      appData.newShape.vertices = [
+                        _startpoint,
+                        Offset(docPosition.dx, _startpoint.dy),
+                        docPosition,
+                        Offset(_startpoint.dx, docPosition.dy),
+                        _startpoint, // Add the starting point again to close the rectangle
+                      ];
+
+                      appData.notifyListeners();
+                    } else if (appData.toolSelected == "shape_rectangle" &&
+                        paintingEllipse == true) {
                     } else if (appData.toolSelected == "pointer_shapes" &&
                         appData.selectedShapeIndex != -1) {
                       Offset newShapePosition = docPosition - _dragStartOffset;
@@ -325,8 +391,19 @@ class LayoutDesignState extends State<LayoutDesign> {
                         clickCount = 0;
                       });
                     }
-                  } else if (appData.toolSelected == "shape_ellipsis" &&
-                      paintingEllipse) {
+                  } else if (paintingEllipse &&
+                      appData.toolSelected == "shape_rectangle") {
+                    // Finish drawing the rectangle
+                    paintingEllipse = false;
+
+                    // Optionally, add the rectangle shape to the shapes list
+                    if (appData.newShape.vertices.length >= 4) {
+                      appData.addNewShapeToShapesList();
+                    }
+
+                    setState(() {});
+                  } else if (appData.toolSelected == "shape_rectangle" &&
+                      paintingEllipse == true) {
                   } else if (appData.toolSelected == "pointer_shapes" &&
                       appData.selectedShapeIndex != -1) {
                     Size docSize =
