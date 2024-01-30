@@ -19,6 +19,8 @@ class AppData with ChangeNotifier {
   bool hide = false;
   Color previousColor = Colors.black;
   Color previousFillColor = Colors.black;
+  bool saveAs = false;
+  String savedFilepath = "";
 
   bool isSwitched = false;
   bool hidefillcolor = false;
@@ -32,6 +34,11 @@ class AppData with ChangeNotifier {
 
   void setBackgroundColor(Color value) {
     backgroundColor = value;
+    notifyListeners();
+  }
+
+  void setFiledPath(String value) {
+    savedFilepath = value;
     notifyListeners();
   }
 

@@ -89,9 +89,6 @@ class AppClickSelector {
                   4)
               .toInt();
       if (pixelIndex >= 0 && pixelIndex < byteData.lengthInBytes - 4) {
-        // int red = byteData.getUint8(pixelIndex);
-        // int green = byteData.getUint8(pixelIndex + 1);
-        // int blue = byteData.getUint8(pixelIndex + 2);
         int alpha = byteData.getUint8(pixelIndex + 3);
 
         return alpha != 0;
@@ -124,7 +121,6 @@ class AppClickSelector {
 
     Color tmpFill = shape.fillColor;
     if (tmpFill.alpha != 0) {
-      print("entre");
       shape.fillColor = appData.fillcolor;
     }
 

@@ -36,7 +36,19 @@ abstract class Shape {
 
   void addRelativePoint(Offset point);
 
-  Map<String, dynamic> toMap();
+  Map<String, dynamic> toMap() {
+    return {
+      'position': {'x': position.dx, 'y': position.dy},
+      'scale': {'width': scale.width, 'height': scale.height},
+      'rotation': rotation,
+      'vertices':
+          vertices.map((offset) => {'x': offset.dx, 'y': offset.dy}).toList(),
+      'stroke': stroke,
+      'color': color.value,
+      'closed': closed,
+      'fillColor': fillColor.value,
+    };
+  }
 
   static Shape fromMap(Map<String, dynamic> map) {
     // TODO: implement fromMap
