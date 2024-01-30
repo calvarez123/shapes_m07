@@ -411,7 +411,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
                       _doubleTapTimer!.cancel();
                       appData.addNewShapeToShapesList();
-                      paintingLine = false; // Cambiar la variable a falso
+                      paintingLine = false;
 
                       clickCount = 0;
                     } else {
