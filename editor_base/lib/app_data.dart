@@ -226,7 +226,7 @@ class AppData with ChangeNotifier {
   Future<void> saveAsNewFile(String type) async {
     String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Please, choose where you would like to save your file:',
-        fileName: type == 'json' ? 'MyDraw.json' : 'mySVG.xml');
+        fileName: type == 'json' ? 'MyDraw.json' : 'NEWSVG.xml');
 
     if (outputFile != null) {
       createSavedSVG(outputFile);
