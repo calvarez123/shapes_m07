@@ -188,20 +188,37 @@ class LayoutDesignState extends State<LayoutDesign> {
                     setState(() {});
                     /*----------------------------MULTIlINEA------------------------------*/
                   } else if (appData.toolSelected == "shape_multiline") {
-                    _startpoint = _getDocPosition(
-                      event.localPosition,
-                      appData.zoom,
-                      constraints.maxWidth,
-                      constraints.maxHeight,
-                      appData.docSize.width,
-                      appData.docSize.height,
-                      _scrollCenter.dx,
-                      _scrollCenter.dy,
-                    );
-
-                    // Inicializa la lista de puntos
-
-                    paintingLine = true;
+                    if (paintingLine) {
+                      // Agregar el punto actual a la lista de vértices
+                      Offset currentPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+                      appData.newShape.vertices.add(currentPoint);
+                    } else {
+                      // Comenzar el dibujo de líneas múltiples
+                      paintingLine = true;
+                      appData.newShape.vertices
+                          .clear(); // Limpiar la lista de vértices
+                      // Agregar el primer punto a la lista de vértices
+                      Offset startPoint = _getDocPosition(
+                        event.localPosition,
+                        appData.zoom,
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                        appData.docSize.width,
+                        appData.docSize.height,
+                        _scrollCenter.dx,
+                        _scrollCenter.dy,
+                      );
+                      appData.newShape.vertices.add(startPoint);
+                    }
                     setState(() {});
                     /*----------------------------rectangle------------------------------*/
                   }
@@ -247,7 +264,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     }
                   }
                   /*
-                  
+
                   */
                   setState(() {});
                 },
@@ -308,7 +325,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                         _scrollCenter.dy,
                       );
 
-                      appData.newShape.vertices = [_startpoint, currentPoint];
+                      appData.newShape.vertices.add(currentPoint);
 
                       appData.notifyListeners();
                       /*----------------------------rectangle------------------------------*/
@@ -387,11 +404,7 @@ class LayoutDesignState extends State<LayoutDesign> {
 
                   if (appData.toolSelected == "shape_drawing") {
                     appData.addNewShapeToShapesList();
-                  }
-
-                  //con esto hago la tool de dibujar si se seleciona el de las peqeñas lineas
-
-                  else if (appData.toolSelected == "shape_line" &&
+                  } else if (appData.toolSelected == "shape_line" &&
                       paintingLine == true) {
                     Size docSize =
                         Size(appData.docSize.width, appData.docSize.height);
@@ -411,8 +424,7 @@ class LayoutDesignState extends State<LayoutDesign> {
                     if (_doubleTapTimer != null && _doubleTapTimer!.isActive) {
                       _doubleTapTimer!.cancel();
                       appData.addNewShapeToShapesList();
-                      paintingLine = false;
-
+                      paintingLine = false; // Cambiar la variable a falso
                       clickCount = 0;
                     } else {
                       _doubleTapTimer = Timer(Duration(milliseconds: 300), () {
@@ -467,6 +479,13 @@ class LayoutDesignState extends State<LayoutDesign> {
                       newShapePosition,
                     );
                     appData.actionManager.register(action);
+                  }
+
+                  // Finish drawing multiline when right mouse button is clicked
+                  if (appData.toolSelected == "shape_multiline" &&
+                      event.buttons == 2) {
+                    appData.addNewShapeToShapesList();
+                    paintingLine = false;
                   }
 
                   setState(() {});
@@ -550,8 +569,7 @@ class LayoutDesignState extends State<LayoutDesign> {
   ) {
     List<Offset> vertices = [];
 
-    int segments =
-        36; // You can adjust the number of segments for a smoother ellipse
+    int segments = 36;
 
     for (int i = 0; i < segments; i++) {
       double angle = (2 * 3.14159265358979323846 * i) / segments;

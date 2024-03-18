@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:editor_base/util_shape.dart';
+import 'package:xml/xml.dart' as xml;
 
 class ShapeDrawing extends Shape {
   ShapeDrawing() : super();
@@ -70,17 +71,102 @@ class ShapeDrawing extends Shape {
 
     var objectMap = map['object'] as Map<String, dynamic>;
     var shape = ShapeDrawing()
-      ..setPosition(
-          Offset(objectMap['position']['dx'], objectMap['position']['dy']))
-      ..setStrokeWidth(objectMap['strokeWidth'])
+      ..setPosition(Offset(objectMap['position']['dx'].toDouble(),
+          objectMap['position']['dy'].toDouble()))
+      ..setStrokeWidth(objectMap['strokeWidth'].toDouble())
       ..setColor(Color(objectMap['strokeColor']));
 
     if (objectMap['vertices'] != null) {
-      var verticesList = objectMap['vertices'] as List;
-      shape.vertices =
-          verticesList.map((v) => Offset(v['dx'], v['dy'])).toList();
+      var verticesList = objectMap['vertices'] as List<dynamic>;
+      if (verticesList.isNotEmpty) {
+        shape.vertices = verticesList.map((v) {
+          if (v is Map<String, dynamic> && v['dx'] != null && v['dy'] != null) {
+            return Offset(v['dx'].toDouble(), v['dy'].toDouble());
+          }
+          return Offset.zero; // Or any default value you prefer
+        }).toList();
+      }
     }
 
     return shape;
+  }
+
+  xml.XmlElement mapShapeSVG() {
+    double strokeOpacity = color.alpha / 255.0;
+    String path = "";
+
+    Offset absoluteCurrentPosition;
+    Rect rect = Rect.fromPoints(vertices[0], vertices[1]);
+    double width = rect.right - rect.left;
+    double height = rect.bottom - rect.top;
+
+    absoluteCurrentPosition = getRectanglePositionSVG(vertices, width, height);
+
+    for (int i = 0; i < vertices.length; i++) {
+      if (i == 0) {
+        path += "M${absoluteCurrentPosition.dx} ${absoluteCurrentPosition.dy}";
+      } else if (vertices[i] == vertices.last && closed) {
+        double diffX = vertices[i].dx - vertices[i - 1].dx;
+        double diffY = vertices[i].dy - vertices[i - 1].dy;
+
+        absoluteCurrentPosition = Offset(absoluteCurrentPosition.dx + diffX,
+            absoluteCurrentPosition.dy + diffY);
+
+        path +=
+            " L${absoluteCurrentPosition.dx} ${absoluteCurrentPosition.dy} Z";
+      } else {
+        double diffX = vertices[i].dx - vertices[i - 1].dx;
+        double diffY = vertices[i].dy - vertices[i - 1].dy;
+
+        absoluteCurrentPosition = Offset(absoluteCurrentPosition.dx + diffX,
+            absoluteCurrentPosition.dy + diffY);
+
+        path += " L${absoluteCurrentPosition.dx} ${absoluteCurrentPosition.dy}";
+      }
+    }
+
+    var attributes = [
+      xml.XmlAttribute(xml.XmlName('d'), path),
+      xml.XmlAttribute(xml.XmlName('stroke'),
+          'rgb(${color.red},${color.green},${color.blue})'),
+      xml.XmlAttribute(xml.XmlName('stroke-opacity'), '$strokeOpacity'),
+      xml.XmlAttribute(xml.XmlName('stroke-width'), stroke.toString()),
+      xml.XmlAttribute(xml.XmlName('opacity'), "1.0"),
+      xml.XmlAttribute(xml.XmlName('fill'),
+          'rgb(${fillColor.red},${fillColor.green},${fillColor.blue})')
+    ];
+
+    if (closed) {
+      double fillOpacity = fillColor.alpha / 255.0;
+      attributes
+          .add(xml.XmlAttribute(xml.XmlName('fill-opacity'), '$fillOpacity'));
+    } else {
+      attributes.add(xml.XmlAttribute(xml.XmlName('fill-opacity'), '0.0'));
+    }
+
+    var pathElement = xml.XmlElement(xml.XmlName('path'), attributes);
+
+    return pathElement;
+  }
+
+  Offset getRectanglePositionSVG(
+      List<Offset> vertexs, double width, double height) {
+    Offset temporalPosition;
+
+    if (vertices[0].dx > vertices[1].dx) {
+      if (vertices[0].dy < vertices[1].dy) {
+        temporalPosition = Offset(position.dx - width, position.dy);
+      } else {
+        temporalPosition = Offset(position.dx - width, position.dy - height);
+      }
+    } else {
+      if (vertices[0].dy > vertices[1].dy) {
+        temporalPosition = Offset(position.dx, position.dy - height);
+      } else {
+        temporalPosition = position;
+      }
+    }
+
+    return temporalPosition;
   }
 }

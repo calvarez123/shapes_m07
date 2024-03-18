@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
+import 'package:editor_base/ShapeDrawing.dart';
 import 'package:editor_base/app_data_actions.dart';
 import 'package:editor_base/util_shape.dart';
 import 'package:flutter/material.dart';
@@ -110,12 +111,11 @@ void _copyToClipboard(AppData appData) {
 Future<void> _pasteFromClipboard(AppData appData) async {
   try {
     String? jsonString = await Clipboard.getData(Clipboard.kTextPlain)
-        ?.then((value) => value?.text);
+        .then((value) => value?.text);
     if (jsonString != null) {
       Map<String, dynamic> map = jsonDecode(jsonString);
       if (map['type'] == 'shape_drawing') {
         var shape = Shape.fromMap(map);
-
         appData.actionManager.register(ActionAddNewShape(appData, shape));
       }
     }

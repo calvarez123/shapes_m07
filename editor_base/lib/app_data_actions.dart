@@ -165,20 +165,14 @@ class ActionColorShape implements Action {
 
   @override
   void undo() {
-    // Asegúrate de que el índice sea válido antes de acceder a la lista
-    if (shapeIndex >= 0 && shapeIndex < appData.shapesList.length) {
-      appData.shapesList[shapeIndex].color = previousColor;
-      appData.forceNotifyListeners();
-    }
+    appData.shapesList[shapeIndex].color = previousColor;
+    appData.forceNotifyListeners();
   }
 
   @override
   void redo() {
-    // Asegúrate de que el índice sea válido antes de acceder a la lista
-    if (shapeIndex >= 0 && shapeIndex < appData.shapesList.length) {
-      appData.shapesList[shapeIndex].color = actualColor;
-      appData.forceNotifyListeners();
-    }
+    appData.shapesList[shapeIndex].color = actualColor;
+    appData.forceNotifyListeners();
   }
 }
 

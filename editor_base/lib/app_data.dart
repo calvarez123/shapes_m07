@@ -1,8 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:editor_base/ShapeDrawing.dart';
 import 'package:editor_base/app_click_selector.dart';
+import 'package:editor_base/layout_sidebar_document.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'app_data_actions.dart';
 import 'util_shape.dart';
+import 'package:xml/xml.dart' as xml;
 
 class AppData with ChangeNotifier {
   // Access appData globaly with:
@@ -213,5 +219,41 @@ class AppData with ChangeNotifier {
       shapesList[selectedShapeIndex].setPosition(newShapePosition);
       notifyListeners();
     }
+  }
+
+  File? openedFile;
+
+  Future<void> saveAsNewFile(String type) async {
+    String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Please, choose where you would like to save your file:',
+        fileName: type == 'json' ? 'MyDraw.json' : 'mySVG.xml');
+
+    if (outputFile != null) {
+      createSavedSVG(outputFile);
+
+      notifyListeners();
+    }
+  }
+
+  void createSavedSVG(String filePath) {
+    var svgElement = xml.XmlElement(xml.XmlName('svg'), [
+      xml.XmlAttribute(xml.XmlName('xmlns'), 'http://www.w3.org/2000/svg'),
+      xml.XmlAttribute(xml.XmlName('width'), docSize.width.toString()),
+      xml.XmlAttribute(xml.XmlName('height'), docSize.height.toString())
+    ]);
+
+    List<xml.XmlNode> svgChildrenList = [];
+
+    for (var shape in shapesList) {
+      svgChildrenList.add(shape.mapShapeSVG());
+    }
+
+    svgElement.children.addAll(svgChildrenList);
+    var docXML = xml.XmlDocument([svgElement]);
+
+    File(filePath)
+        .writeAsString(docXML.toXmlString(pretty: true))
+        .then((_) => print('svg creado'))
+        .catchError((error) => print('ERROR SVG $error'));
   }
 }

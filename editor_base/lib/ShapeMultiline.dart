@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:editor_base/util_shape.dart';
+import 'package:xml/src/xml/nodes/element.dart';
 
 class ShapeMultiline extends Shape {
   ShapeMultiline() : super();
@@ -82,5 +83,11 @@ class ShapeMultiline extends Shape {
     }
 
     return shape;
+  }
+
+  @override
+  XmlElement mapShapeSVG() {
+    // TODO: implement mapShapeSVG
+    throw UnimplementedError();
   }
 }

@@ -129,26 +129,21 @@ class LayoutSidebarDocumentState extends State<LayoutSidebarDocument> {
                   if (filePath != null) {
                     print('Carpeta seleccionada: $filePath');
                     File file = File(filePath.files.single.path!);
+
                     String jsonContent = await file.readAsString();
                     List<Map<String, dynamic>> shapesMapList =
                         (jsonDecode(jsonContent) as List<dynamic>)
                             .cast<Map<String, dynamic>>();
 
-                    // Crear instancias de las formas a partir del mapa
-                    List<Shape> loadedShapes = shapesMapList.map((map) {
-                      String shapeType = map['type'];
-                      switch (shapeType) {
-                        case 'shape_drawing':
-                          return ShapeDrawing()..fromMap(map);
-                        // Agregar más casos según sea necesario para otras formas
-                        default:
-                          throw Exception(
-                              'Tipo de forma desconocido: $shapeType');
-                      }
-                    }).toList();
+                    // Si fromMap() espera un solo mapa, selecciona uno de shapesMapList
+                    if (shapesMapList.isNotEmpty) {
+                      Map<String, dynamic> shapeMap = shapesMapList.first;
+                      fromMap(shapeMap);
+                    }
+                    // Si fromMap() espera una lista de mapas, pasa shapesMapList directamente
 
                     // Hacer lo que necesites con las formas cargadas (por ejemplo, asignarlas a appData.shapesList)
-                    appData.shapesList = loadedShapes;
+
                     appData.notifyListeners();
                     print('Formas cargadas con éxito desde: ${file.path}');
                   }
@@ -202,6 +197,7 @@ class LayoutSidebarDocumentState extends State<LayoutSidebarDocument> {
                       await FilePicker.platform.getDirectoryPath();
 
                   if (filePath != null) {
+                    appData.saveAsNewFile(filePath);
                     print('Carpeta seleccionada: $filePath');
                   }
                 },
@@ -252,4 +248,31 @@ class LayoutSidebarDocumentState extends State<LayoutSidebarDocument> {
       ),
     );
   }
+}
+
+Shape fromMap(Map<String, dynamic> map) {
+  if (map['type'] != 'shape_drawing') {
+    throw Exception('Type is not a shape_drawing');
+  }
+
+  var objectMap = map['object'] as Map<String, dynamic>;
+  var shape = ShapeDrawing()
+    ..setPosition(Offset(objectMap['position']['dx'].toDouble(),
+        objectMap['position']['dy'].toDouble()))
+    ..setStrokeWidth(objectMap['strokeWidth'].toDouble())
+    ..setColor(Color(objectMap['strokeColor']));
+
+  if (objectMap['vertices'] != null) {
+    var verticesList = objectMap['vertices'] as List<dynamic>;
+    if (verticesList.isNotEmpty) {
+      shape.vertices = verticesList.map((v) {
+        if (v is Map<String, dynamic> && v['dx'] != null && v['dy'] != null) {
+          return Offset(v['dx'].toDouble(), v['dy'].toDouble());
+        }
+        return Offset.zero; // Or any default value you prefer
+      }).toList();
+    }
+  }
+
+  return shape;
 }

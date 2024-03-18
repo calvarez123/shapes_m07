@@ -1,5 +1,11 @@
+import 'package:editor_base/ShapeDrawing.dart';
+import 'package:editor_base/ShapeEllipse.dart';
+import 'package:editor_base/ShapeLine.dart';
+import 'package:editor_base/ShapeMultiline.dart';
+import 'package:editor_base/ShapeRectangle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:xml/xml.dart' as xml;
 
 import 'package:flutter/material.dart';
 
@@ -51,7 +57,48 @@ abstract class Shape {
   }
 
   static Shape fromMap(Map<String, dynamic> map) {
-    // TODO: implement fromMap
-    throw UnimplementedError();
+    Shape shape;
+    switch (map['type']) {
+      case 'shape_drawing':
+        shape = ShapeDrawing();
+        break;
+      case 'shape_line':
+        shape = ShapeLine();
+        break;
+      case 'shape_multiline':
+        shape = ShapeMultiline();
+        break;
+      case 'shape_rectangle':
+        shape = ShapeRectangle();
+        break;
+      case 'shape_ellipse':
+        shape = ShapeEllipse();
+        break;
+      default:
+        throw Exception('Type is not a known shape type');
+    }
+
+    var objectMap = map['object'] as Map<String, dynamic>;
+    shape
+      ..setPosition(Offset(objectMap['position']['dx'].toDouble(),
+          objectMap['position']['dy'].toDouble()))
+      ..setStrokeWidth(objectMap['strokeWidth'].toDouble())
+      ..setColor(Color(objectMap['strokeColor']));
+
+    if (objectMap['vertices'] != null) {
+      var verticesList = objectMap['vertices'] as List<dynamic>;
+      if (verticesList.isNotEmpty) {
+        shape.vertices = verticesList.map((v) {
+          if (v is Map<String, dynamic> && v['dx'] != null && v['dy'] != null) {
+            return Offset(v['dx'].toDouble(), v['dy'].toDouble());
+          }
+          return Offset.zero; // Or any default value you prefer
+        }).toList();
+      }
+    }
+
+    return shape;
   }
+
+  xml.XmlElement mapShapeSVG();
 }
